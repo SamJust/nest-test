@@ -1,7 +1,9 @@
-import { Controller, Get, Query, Post, Body, Put, Param } from '@nestjs/common';
+import { Controller, Get, Query, Post, Body, Put, Param, UsePipes } from '@nestjs/common';
 import { BookService } from './books.service';
 import { Book } from './book.entity';
-import { URLSearchParams } from 'url';
+import { JoiValidationPipe } from './validationPipe';
+import updateBookSchema from './schemas/updateBookSchema';
+import createBookSchema from './schemas/createBookSchema';
 
 @Controller('books')
 export class BooksController {
@@ -13,11 +15,13 @@ export class BooksController {
     }
 
     @Post()
-    createBook(@Body() book): Promise<Book> {
+    @UsePipes(new JoiValidationPipe(createBookSchema))
+    createBook(@Body() book: Book): Promise<Book> {
         return this.bookService.createBook(book);
     }
 
     @Put(':bookId')
+    @UsePipes(new JoiValidationPipe(updateBookSchema))
     async updateBook(@Body() book, @Param() { bookId }) {
         await this.bookService.updateBook(bookId, book);
     }
